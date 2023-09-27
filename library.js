@@ -7,14 +7,13 @@ const pageInput = dialog.querySelector("#pages");
 const readInput = dialog.querySelector("#read");
 const submitBtn = dialog.querySelector(".submit");
 const cancelBtn = dialog.querySelector(".cancel");
-let bookIndex = 0;
+const table = document.querySelector("table");
 
 function Book(author, title, pages, read) {
     this.title = title;
     this.author = author;
     this.pages = pages;
     this.read = read;
-    this.index = bookIndex;
 }
 
 function addBookToLibrary(author, title, pages, read) {
@@ -29,20 +28,52 @@ function addBookToLibrary(author, title, pages, read) {
 }
 
 function displayBooks () {
-    let table = document.querySelector("table");
     for(let book of myLibrary) {
-        if(!(book.index === bookIndex)) {
+        const index = myLibrary.indexOf(book);
+        if(!(index === myLibrary.length - 1)) {
             continue;
         }
-        let row = table.insertRow();
+        
+        const row = table.insertRow();
+        row.setAttribute("index", index);
         const authorCell = row.insertCell(0);
         const titleCell = row.insertCell(1);
         const pagesCell = row.insertCell(2);
         const readCell = row.insertCell(3);
+        const statusCell = row.insertCell(4);
+        const removeCell = row.insertCell(5);
+
         authorCell.innerText = book.author;
         titleCell.innerText = book.title;
         pagesCell.innerText = book.pages;
         readCell.innerText = book.read;
+
+        const statusBtn = document.createElement("button");  
+        statusBtn.classList.add("changeStatus");
+        statusBtn.innerText = "Change";
+
+        const removeBtn = document.createElement("button");
+        removeBtn.classList.add("remove");
+        removeBtn.innerText = "Remove";
+
+        statusCell.appendChild(statusBtn);
+        removeCell.appendChild(removeBtn);
+
+        statusBtn.addEventListener('click', e => {
+            if(readCell.innerText === "Yes") {
+                readCell.innerText = "No";
+                myLibrary[row.getAttribute("index")].read = "No";
+            }else {
+                readCell.innerText = "Yes";
+                myLibrary[row.getAttribute("index")].read = "Yes";
+            }             
+        });
+
+        removeCell.addEventListener('click', e => {
+            const removeIndex = row.getAttribute("index");
+            row.remove();
+            myLibrary.splice(removeIndex, 1);
+        })
     }
 }
 
@@ -68,7 +99,6 @@ submitBtn.addEventListener("click", e => {
     dialog.close();
     addBookToLibrary(authorInput.value, titleInput.value, pageInput.value, readInput.checked);
     displayBooks();
-    bookIndex++;
     reset();
 })
 
